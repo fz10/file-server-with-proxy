@@ -1,2 +1,22 @@
 {
+  "users": {
+
+  },
+  "servers": {
+    "server1": {
+      "socket": "tcp://*:5556", "capacity": 50, "filled": 0,"files": {
+
+      }
+    },
+		"server2": {
+      "socket": "tcp://*:5557", "capacity": 100, "filled": 0, "files": {
+
+      }
+    },
+		"server3": {
+      "socket": "tcp://*:5558", "capacity": 90, "filled": 0, "files": {
+        
+      }
+    },
+		},
 }
