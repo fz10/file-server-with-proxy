@@ -51,7 +51,7 @@ def login():
             else:
                 print('Try again ...\n')
 
-# This function checks if the file exists in the clients directory
+# This function checks if the file exists in the client's directory
 def exists(filename, path):
     list = os.listdir(path)
     if filename in list:

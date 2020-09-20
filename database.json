@@ -1,22 +1,13 @@
 {
-  "users": {
-
-  },
-  "servers": {
-    "server1": {
-      "socket": "tcp://*:5556", "capacity": 50, "filled": 0,"files": {
-
-      }
+    "users": {
+        "Carlos": {
+            "password": "12345Carlos",
+            "files": {}
+        },
+        "Alex": {
+            "password": "12345Alex",
+            "files": {}
+        }
     },
-		"server2": {
-      "socket": "tcp://*:5557", "capacity": 100, "filled": 0, "files": {
-
-      }
-    },
-		"server3": {
-      "socket": "tcp://*:5558", "capacity": 90, "filled": 0, "files": {
-        
-      }
-    },
-		},
+    "servers": {}
 }
