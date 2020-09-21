@@ -10,7 +10,7 @@ context = zmq.Context()
 #  Socket to talk to server
 print("Connecting to server ...\n")
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:5555")
+socket.connect("tcp://localhost:4444")
 
 partsize = 1024 * 1024 * 10
 cpath = '../Clients/'
