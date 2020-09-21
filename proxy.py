@@ -110,10 +110,10 @@ def createServer(serverNum, capacity):
 def listfiles(user):
     with open('database.json', 'r') as db:
         db_object = json.load(db)
-    files = db_object['users'][user]['files']
-    print('Sending list of files to client...\n')
+    files = list(db_object['users'][user]['files'].keys())
+    print('Sending list of files to client...')
     socket.send_json(files)
-
+    print('List of files sent successfully!!\n')
 
 # ProxyUp runs the proxy server, so it can start listening
 # to requests through the socket
@@ -128,18 +128,18 @@ def ProxyUp():
         elif cmd == 'register':
             # Code to execute when request is register
             register(request[1].decode(), request[2].decode())
-        elif cmd == 'exists':
-            # code to execute when request is exists for upload
-            exists(request[1].decode(), request[2].decode())
+        # elif cmd == 'exists':
+        #     # code to execute when request is exists for upload
+        #     exists(request[1].decode(), request[2].decode())
         elif cmd == 'new':
             # code to execute when a server wants to be created
             newServer(request[1].decode())
         elif cmd == 'create':
             # code to execute when server is created
             createServer(request[1].decode(), float(request[2].decode()))
-        # elif cmd == 'list':
-        #     # code to execute when request is list
-        #     listfiles(request[1].decode())
+        elif cmd == 'list':
+            # code to execute when request is list
+            listfiles(request[1].decode())
         # elif cmd == 'upload':
         #     # code to execute when request is upload
         #     upload(request[1].decode(), request[2].decode(), request[3])

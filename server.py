@@ -28,7 +28,7 @@ def serverCreation():
         capacity = math.ceil(float(input('Server can be created, please insert capacity in GB: ')) * 1073741824)
         req.send_multipart(['create'.encode(), serverNum.encode(), str(capacity).encode()])
         resp = req.recv_string()
-        spath = spath + serverNum
+        spath = spath + 'Server' + serverNum
         os.mkdir(spath)
         socket.bind("tcp://*:{}".format(resp))
         print("Socket created!!!\n")

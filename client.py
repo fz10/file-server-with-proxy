@@ -90,11 +90,11 @@ def upload():
 # This function requests the list of files whose owner is
 # the current user
 def list():
-    print('Requesting list of files to the server...\n')
+    print('Requesting list of files to server...\n')
     socket.send_multipart(['list'.encode(), user.encode()])
     files = socket.recv_json()
     print("--------------------------------------------\n \
-    Existing files in server: \n")
+    Existing files in servers: \n")
     for file in files:
         print('    ', file, "\n")
     print("--------------------------------------------\n\
@@ -148,12 +148,12 @@ def workflow():
         if cmd == 'list':
             # Code to execute when option is 'list'
             list()
-        elif cmd == 'upload':
-            # Code to execute when option is 'upload'
-            upload()
-        elif cmd == 'download':
-            # Code to execute when option is 'download'
-            download()
+        # elif cmd == 'upload':
+        #     # Code to execute when option is 'upload'
+        #     upload()
+        # elif cmd == 'download':
+        #     # Code to execute when option is 'download'
+        #     download()
 
 
 def main():
