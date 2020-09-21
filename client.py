@@ -4,6 +4,7 @@ import zmq
 import json
 import os
 import getpass
+import math
 
 context = zmq.Context()
 
@@ -22,6 +23,7 @@ user = ''
 def login():
     validator = False
     global user
+    global socket
     while not validator:
         username = input('Please insert Username: ')
         pw = getpass.getpass('Password: ')
@@ -72,20 +74,39 @@ def upload():
                 if resp == 'file exists':
                     newname = input('file already exists in server, please insert a new name for it: ')
                 else:
-                    break
-            with open(cpath + filename, 'rb') as f:
-                while True:
-                    part = f.read(partsize)
-                    if not part:
-                        print('file uploaded successfully\n')
-                        validator = True
-                        break
-                    socket.send_multipart(['upload'.encode(), user.encode(), newname.encode(), part])
-                    resp = socket.recv_string()
                     print(resp)
-
+                    break
+            parts = []
+            name = os.path.splitext(newname)[0]
+            ext = os.path.splitext(newname)[1]
+            quantityParts = math.ceil(float(os.path.getsize(cpath + filename)) / float(partsize))
+            for i in range(0, quantityParts):
+                parts.append(name + user + str(i) + ext)
+            jparts = json.dumps(parts)
+            socket.send_multipart(['upload'.encode(), user.encode(), newname.encode(), jparts.encode()])
+            resp = socket.recv_multipart()
+            print(resp[0].decode())
+            validator = True
         else:
             print('filename is not correct, please try again ...\n')
+    partnames = json.loads(resp[1].decode())
+    serversockets = json.loads(resp[2].decode())
+    with open(cpath + filename, 'rb') as f:
+        i = 0
+        while True:
+            bytes = f.read(partsize)
+            if not bytes:
+                print('File uploaded successfully\n')
+                break
+            # Send part to a specific socket
+            socket.connect("tcp://localhost:{}".format(serversockets[i]))
+            socket.send_multipart(['upload'.encode(), partnames[i].encode(), bytes])
+            i += 1
+            resp = socket.recv_string()
+            print(resp)
+    socket.connect("tcp://localhost:4444")
+
+
 
 # This function requests the list of files whose owner is
 # the current user
@@ -103,36 +124,36 @@ def list():
 # This function requests downloads from the server
 # first checks if it exists in server, then it checks
 # if it exists in 'Downloads folder'
-def download():
-    newname = ''
-    while True: #let's check file existence in server
-        filename = input('Please insert filename to Download: ')
-        socket.send_multipart(['exists'.encode(), user.encode(), filename.encode()])
-        resp = socket.recv_string()
-        if resp == 'file exists':
-            newname = filename
-            print('Filename Correct')
-            break
-        else:
-            print('file does not exist, please try again...\n')
-    #let's check if it exists or not in 'Downloads'
-    while True:
-        if exists(newname, dpath):
-            newname = input('file already exists in Downloads folder, please insert a new name for it: ')
-        else:
-            break
-    with open(dpath + newname, 'wb') as f:
-        while True:
-            socket.send_multipart(['download'.encode(), user.encode(), filename.encode(), str(f.tell()).encode(), str(partsize).encode()])
-            resp = socket.recv_multipart()
-            if resp[0].decode() == 'downloading...':
-                print(resp[0].decode())
-                part = resp[1]
-                f.write(part)
-            else:
-                print(resp[0].decode())
-                print('File downloaded successfully as {}\n'.format(newname))
-                break
+# def download():
+#     newname = ''
+#     while True: #let's check file existence in server
+#         filename = input('Please insert filename to Download: ')
+#         socket.send_multipart(['exists'.encode(), user.encode(), filename.encode()])
+#         resp = socket.recv_string()
+#         if resp == 'file exists':
+#             newname = filename
+#             print('Filename Correct')
+#             break
+#         else:
+#             print('file does not exist, please try again...\n')
+#     #let's check if it exists or not in 'Downloads'
+#     while True:
+#         if exists(newname, dpath):
+#             newname = input('file already exists in Downloads folder, please insert a new name for it: ')
+#         else:
+#             break
+#     with open(dpath + newname, 'wb') as f:
+#         while True:
+#             socket.send_multipart(['download'.encode(), user.encode(), filename.encode(), str(f.tell()).encode(), str(partsize).encode()])
+#             resp = socket.recv_multipart()
+#             if resp[0].decode() == 'downloading...':
+#                 print(resp[0].decode())
+#                 part = resp[1]
+#                 f.write(part)
+#             else:
+#                 print(resp[0].decode())
+#                 print('File downloaded successfully as {}\n'.format(newname))
+#                 break
 
 
 
@@ -148,9 +169,9 @@ def workflow():
         if cmd == 'list':
             # Code to execute when option is 'list'
             list()
-        # elif cmd == 'upload':
-        #     # Code to execute when option is 'upload'
-        #     upload()
+        elif cmd == 'upload':
+            # Code to execute when option is 'upload'
+            upload()
         # elif cmd == 'download':
         #     # Code to execute when option is 'download'
         #     download()

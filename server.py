@@ -40,9 +40,23 @@ def serverCreation():
         print("Socket created!!!\n")
         print('Server is Up!!\n')
 
+def upload(filename, bytes):
+    with open(spath + '/{}'.format(filename), 'ab') as f:
+        f.write(bytes)
+    print('filepart saved successfully')
+    socket.send_string('uploading ...')
 
 def serverUp():
-    pass
+    while True:
+        print('Waiting for requests ...\n')
+        request = socket.recv_multipart()
+        cmd = request[0].decode()
+        if cmd == 'upload':
+            # Code to execute when request is upload
+            upload(request[1].decode(), request[2])
+        elif cmd == 'download':
+            # Code to execute when request is download
+            download()
 
 def main():
     serverCreation()

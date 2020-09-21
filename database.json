@@ -9,5 +9,24 @@
             "files": {}
         }
     },
-    "servers": {}
+    "servers": {
+        "server1": {
+            "socket": "5555",
+            "capacity": 512,
+            "filled": 0,
+            "files": []
+        },
+        "server2": {
+            "socket": "5556",
+            "capacity": 615,
+            "filled": 0,
+            "files": []
+        },
+        "server3": {
+            "socket": "5557",
+            "capacity": 410,
+            "filled": 0,
+            "files": []
+        }
+    }
 }

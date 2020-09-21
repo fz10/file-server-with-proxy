@@ -47,6 +47,7 @@ def register(username, pw):
         print('Username already exists')
 
 def newServer(serverNum):
+    global serverDir
     serverName = 'server' + serverNum
     with open('database.json', 'r') as db:
         db_object = json.load(db)
@@ -58,6 +59,7 @@ def newServer(serverNum):
         socket.send_multipart(['exists'.encode(), sdir.encode()])
         print('Server info already exists, connecting it...\n')
         print('Server connected successfully')
+        serverDir = int(db_object['servers'][serverName]['socket']) + 1
 
 def createServer(serverNum, capacity):
 
@@ -81,29 +83,54 @@ def createServer(serverNum, capacity):
 
 
 
-# Function that appends the part of the file in bytes
-# to the existing file in the server
-# def upload(user, filename, part):
-#     with open(spath + user + '/{}'.format(filename), 'ab') as f:
-#         f.write(part)
-#     print('filepart appened successfully')
-#     socket.send_string('uploading ...')
+# Function that receives the file part names
+# in order to start load balancing
+def upload(user, filename, partnames):
+    serversockets = []
+    serverIndex = 0
+    with open('database.json', 'r') as db:
+        db_object = json.load(db)
+    activeServers = list(db_object['servers'].keys())
+    for part in partnames:
+        while True:
+            if serverIndex < len(activeServers):
+                if db_object['servers'][activeServers[serverIndex]]['filled'] < \
+                db_object['servers'][activeServers[serverIndex]]['capacity']:
+                    serversockets.append(db_object['servers'][activeServers[serverIndex]]['socket'])
+                    db_object['servers'][activeServers[serverIndex]]['files'].append(part)
+                    db_object['servers'][activeServers[serverIndex]]['filled'] += 1
+                    serverIndex += 1
+                    break
+                else:
+                    serverIndex += 1
+            else:
+                serverIndex = 0
+    db_object['users'][user]['files'][filename]['fileparts'] = partnames
+    db_object['users'][user]['files'][filename]['serverparts'] = serversockets
+    with open('database.json', 'w') as db:
+        json.dump(db_object, db,indent=4)
+    socket.send_multipart(['list of sockets successfully created!!'.encode(),\
+    json.dumps(partnames).encode(), json.dumps(serversockets).encode()])
+    print('list of sockets successfully created!!')
+
+
+
 
 # This function allows the client to know whether
 # a file to upload already exists, so the client can start
 # sending the parts of the file
-# def exists(user, filename):
-#     with open('db.json', 'r') as db:
-#         db_object = json.load(db)
-#     if filename in db_object[user]['files']:
-#         print('file already exists ...')
-#         socket.send_string('file exists')
-#     else:
-#         print('file can be uploaded')
-#         db_object[user]['files'].append(filename)
-#         with open('db.json', 'w') as db:
-#             json.dump(db_object, db, indent=4)
-#         socket.send_string('ok')
+def exists(user, filename):
+    with open('database.json', 'r') as db:
+        db_object = json.load(db)
+    if filename in db_object['users'][user]['files'].keys():
+        print('file already exists ...')
+        socket.send_string('file exists')
+    else:
+        db_object['users'][user]['files'][filename] = {}
+        print('file can be uploaded')
+        with open('database.json', 'w') as db:
+            json.dump(db_object, db, indent=4)
+        socket.send_string('file can be uploaded')
 
 # Function that returns the list of files from
 # a specific user
@@ -128,9 +155,9 @@ def ProxyUp():
         elif cmd == 'register':
             # Code to execute when request is register
             register(request[1].decode(), request[2].decode())
-        # elif cmd == 'exists':
-        #     # code to execute when request is exists for upload
-        #     exists(request[1].decode(), request[2].decode())
+        elif cmd == 'exists':
+            # code to execute when request is exists for upload
+            exists(request[1].decode(), request[2].decode())
         elif cmd == 'new':
             # code to execute when a server wants to be created
             newServer(request[1].decode())
@@ -140,9 +167,9 @@ def ProxyUp():
         elif cmd == 'list':
             # code to execute when request is list
             listfiles(request[1].decode())
-        # elif cmd == 'upload':
-        #     # code to execute when request is upload
-        #     upload(request[1].decode(), request[2].decode(), request[3])
+        elif cmd == 'upload':
+            # code to execute when request is upload
+            upload(request[1].decode(), request[2].decode(), json.loads(request[3].decode()))
         # elif cmd == 'download':
         #     # code to execute when request is download
         #     download(request[1].decode(), request[2].decode(), int(request[3].decode()), int(request[4].decode()))
