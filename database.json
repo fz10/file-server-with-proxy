@@ -27,6 +27,12 @@
             "capacity": 410,
             "filled": 0,
             "files": []
+        },
+        "server4": {
+            "socket": "5558",
+            "capacity": 1024,
+            "filled": 0,
+            "files": []
         }
     }
 }

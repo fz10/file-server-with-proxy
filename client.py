@@ -11,7 +11,8 @@ context = zmq.Context()
 #  Socket to talk to server
 print("Connecting to server ...\n")
 socket = context.socket(zmq.REQ)
-socket.connect("tcp://localhost:4444")
+proxy = "tcp://localhost:4444"
+socket.connect(proxy)
 
 partsize = 1024 * 1024 * 10
 cpath = '../Clients/'
@@ -81,7 +82,7 @@ def upload():
             ext = os.path.splitext(newname)[1]
             quantityParts = math.ceil(float(os.path.getsize(cpath + filename)) / float(partsize))
             for i in range(0, quantityParts):
-                parts.append(name + user + str(i) + ext)
+                parts.append(name + user + str(i))
             jparts = json.dumps(parts)
             socket.send_multipart(['upload'.encode(), user.encode(), newname.encode(), jparts.encode()])
             resp = socket.recv_multipart()
@@ -91,6 +92,7 @@ def upload():
             print('filename is not correct, please try again ...\n')
     partnames = json.loads(resp[1].decode())
     serversockets = json.loads(resp[2].decode())
+    socket.disconnect(proxy)
     with open(cpath + filename, 'rb') as f:
         i = 0
         while True:
@@ -101,10 +103,11 @@ def upload():
             # Send part to a specific socket
             socket.connect("tcp://localhost:{}".format(serversockets[i]))
             socket.send_multipart(['upload'.encode(), partnames[i].encode(), bytes])
-            i += 1
             resp = socket.recv_string()
             print(resp)
-    socket.connect("tcp://localhost:4444")
+            socket.disconnect("tcp://localhost:{}".format(serversockets[i]))
+            i += 1
+    socket.connect(proxy)
 
 
 

@@ -35,7 +35,7 @@ def serverCreation():
         print('Server created and added successfully\n')
     elif resp[0].decode() == 'exists':
         print('Reloading server ... \n')
-        spath = spath + serverNum
+        spath = spath + 'Server' + serverNum
         socket.bind("tcp://*:{}".format(resp[1].decode()))
         print("Socket created!!!\n")
         print('Server is Up!!\n')
