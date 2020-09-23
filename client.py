@@ -143,39 +143,46 @@ def list():
     print("--------------------------------------------\n\
     Listing successful !!\n")
 
-# This function requests downloads from the server
-# first checks if it exists in server, then it checks
+# This function requests downloads from the servers
+# first checks if it exists in database, then it checks
 # if it exists in 'Downloads folder'
-# def download():
-#     newname = ''
-#     while True: #let's check file existence in server
-#         filename = input('Please insert filename to Download: ')
-#         socket.send_multipart(['exists'.encode(), user.encode(), filename.encode()])
-#         resp = socket.recv_string()
-#         if resp == 'file exists':
-#             newname = filename
-#             print('Filename Correct')
-#             break
-#         else:
-#             print('file does not exist, please try again...\n')
-#     #let's check if it exists or not in 'Downloads'
-#     while True:
-#         if exists(newname, dpath):
-#             newname = input('file already exists in Downloads folder, please insert a new name for it: ')
-#         else:
-#             break
-#     with open(dpath + newname, 'wb') as f:
-#         while True:
-#             socket.send_multipart(['download'.encode(), user.encode(), filename.encode(), str(f.tell()).encode(), str(partsize).encode()])
-#             resp = socket.recv_multipart()
-#             if resp[0].decode() == 'downloading...':
-#                 print(resp[0].decode())
-#                 part = resp[1]
-#                 f.write(part)
-#             else:
-#                 print(resp[0].decode())
-#                 print('File downloaded successfully as {}\n'.format(newname))
-#                 break
+def download():
+    newname = ''
+    while True: #let's check file existence in server
+        filename = input('Please insert filename to Download: ')
+        socket.send_multipart(['exists'.encode(), user.encode(), filename.encode()])
+        resp = socket.recv_string()
+        if resp == 'file exists':
+            newname = filename
+            print('Filename Correct')
+            break
+        else:
+            print('file does not exist, please try again...\n')
+    #let's check if it exists or not in 'Downloads'
+    while True:
+        if exists(newname, dpath):
+            newname = input('file already exists in Downloads folder, please insert a new name for it: ')
+        else:
+            break
+    socket.send_multipart(['download'.encode(), user.encode(), filename.encode()] )
+    resp = socket.recv_multipart()
+    partnames = json.loads(resp[0].decode())
+    serverparts = json.loads(resp[1].decode())
+    socket.disconnect(proxy)
+    with open(dpath + newname, 'ab') as f:
+        i = 0
+        while i < len(partnames):
+            socket.connect("tcp://localhost:{}".format(serverparts[i]))
+            socket.send_multipart(['download'.encode(), partnames[i].encode()])
+            resp = socket.recv_multipart()
+            print(resp[0].decode())
+            f.write(resp[1])
+            socket.disconnect("tcp://localhost:{}".format(serverparts[i]))
+            i += 1
+        print('File downloaded successfully as {}'.format(newname))
+    socket.connect(proxy)
+
+
 
 
 
@@ -194,9 +201,9 @@ def workflow():
         elif cmd == 'upload':
             # Code to execute when option is 'upload'
             upload()
-        # elif cmd == 'download':
-        #     # Code to execute when option is 'download'
-        #     download()
+        elif cmd == 'download':
+            # Code to execute when option is 'download'
+            download()
 
 
 def main():

@@ -46,6 +46,12 @@ def upload(filename, bytes):
     print('filepart saved successfully')
     socket.send_string('uploading ...')
 
+def download(filepart):
+    with open(spath + '/{}'.format(filepart), 'rb') as f:
+        part = f.read()
+    print('filepart successfully sent')
+    socket.send_multipart(['downloading ...'.encode(), part])
+
 def serverUp():
     while True:
         print('Waiting for requests ...\n')
@@ -56,7 +62,7 @@ def serverUp():
             upload(request[1].decode(), request[2])
         elif cmd == 'download':
             # Code to execute when request is download
-            download()
+            download(request[1].decode())
 
 def main():
     serverCreation()
