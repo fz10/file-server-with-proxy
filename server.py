@@ -41,7 +41,7 @@ def serverCreation():
         print('Server is Up!!\n')
 
 def upload(filename, bytes):
-    with open(spath + '/{}'.format(filename), 'ab') as f:
+    with open(spath + '/{}'.format(filename), 'wb') as f:
         f.write(bytes)
     print('filepart saved successfully')
     socket.send_string('uploading ...')

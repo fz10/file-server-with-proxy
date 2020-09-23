@@ -5,6 +5,7 @@ import json
 import os
 import getpass
 import math
+import hashlib
 
 context = zmq.Context()
 
@@ -62,6 +63,24 @@ def exists(filename, path):
     else:
         return False
 
+def hash(bytes):
+    hasher = hashlib.sha256()
+    hasher.update(bytes)
+    return hasher.hexdigest()
+
+# This function hashes the parts of the file that
+# will be uploaded
+def hashparts(filename, parts):
+    with open(cpath + filename, 'rb') as f:
+        while True:
+            part = f.read(partsize)
+            if not part:
+                print('parts hashed successfully')
+                break
+            parts.append(hash(part))
+    return parts
+
+
 # This function uploads a file to the server segmenting it
 def upload():
     validator = False
@@ -78,12 +97,12 @@ def upload():
                     print(resp)
                     break
             parts = []
-            name = os.path.splitext(newname)[0]
-            ext = os.path.splitext(newname)[1]
-            quantityParts = math.ceil(float(os.path.getsize(cpath + filename)) / float(partsize))
-            for i in range(0, quantityParts):
-                parts.append(name + user + str(i))
-            jparts = json.dumps(parts)
+            # name = os.path.splitext(newname)[0]
+            # ext = os.path.splitext(newname)[1]
+            # quantityParts = math.ceil(float(os.path.getsize(cpath + filename)) / float(partsize))
+            # for i in range(0, quantityParts):
+            #     parts.append(name + user + str(i))
+            jparts = json.dumps(hashparts(filename, parts))
             socket.send_multipart(['upload'.encode(), user.encode(), newname.encode(), jparts.encode()])
             resp = socket.recv_multipart()
             print(resp[0].decode())
