@@ -72,7 +72,7 @@ def createServer(serverIp, serverPort, capacity):
     }
     with open(database, 'w') as db:
         json.dump(db_object, db, indent=4)
-    socket.send_string(serverPort)
+    socket.send_string(serverId)
     print(f'Server {serverId} created and added successfully!!!\n')
 
 
