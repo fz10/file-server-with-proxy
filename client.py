@@ -15,7 +15,7 @@ socket = context.socket(zmq.REQ)
 proxy = "tcp://localhost:4444"
 socket.connect(proxy)
 
-partsize = 1024 * 1024 * 10
+partsize = 1024 * 1024 * 2
 cpath = '../Clients/'
 dpath = '../Clients/Downloads/'
 user = ''
@@ -27,7 +27,7 @@ def login():
     global user
     global socket
     while not validator:
-        username = input('Please insert Username: ')
+        username = input('Please insert Username for login: ')
         pw = getpass.getpass('Password: ')
         socket.send_multipart(['login'.encode(), username.encode(), pw.encode()])
         resp = socket.recv_string()
@@ -41,7 +41,7 @@ def login():
             uresp = input('Username does not exist, do you want to create a new one? y / n ...\n')
             if uresp == 'y':
                 while True:
-                    username = input('Please insert new Username: ')
+                    username = input('Please insert new Username for registration: ')
                     pw = getpass.getpass('Create Password: ')
                     socket.send_multipart(['register'.encode(), username.encode(), pw.encode()])
                     resp = socket.recv_string()
@@ -193,7 +193,7 @@ def workflow():
     while True:
         print('--------------------------------------------')
         print('You\'re logged in as {}\n'.format(user))
-        print('- list\n- upload\n- download\n')
+        print('- list\n- upload\n- download\n- exit\n')
         cmd = input('Please select one of the above options: ')
         if cmd == 'list':
             # Code to execute when option is 'list'
@@ -204,6 +204,9 @@ def workflow():
         elif cmd == 'download':
             # Code to execute when option is 'download'
             download()
+        elif cmd == 'exit':
+            # Code to execute when option is 'download'
+            break
 
 
 def main():

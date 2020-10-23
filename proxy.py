@@ -7,11 +7,11 @@ import math
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
-socket.bind("tcp://*:4444")
+socket.bind("tcp://localhost:4444")
 
 print("Socket created!!!")
 
-partsize = 1024 * 1024 * 10
+partsize = 1024 * 1024 * 2
 
 database = 'database.json'
 

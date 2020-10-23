@@ -7,8 +7,11 @@
         "Alex": {
             "password": "12345Alex",
             "files": {}
+        },
+        "Aiz": {
+            "password": "1234",
+            "files": {}
         }
     },
-    "servers": {
-        }
+    "servers": {}
 }
