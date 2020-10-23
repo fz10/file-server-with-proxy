@@ -8,46 +8,42 @@ import math
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 
-spath = '../Servers/'
+spath = '../Server/'
 
 
 
 
 def serverCreation():
 
-    global socket
     global spath
     req = context.socket(zmq.REQ)
     req.connect("tcp://localhost:4444")
 
-    serverNum = str(input('Please insert server number: '))
-    req.send_multipart(['new'.encode(), serverNum.encode()])
-    resp = req.recv_multipart()
-    if resp[0].decode() == 'ok':
-        #you have to create the folder and socket
-        capacity = math.ceil(float(input('Server can be created, please insert capacity in GB: ')) * 1073741824)
-        req.send_multipart(['create'.encode(), serverNum.encode(), str(capacity).encode()])
-        resp = req.recv_string()
-        spath = spath + 'Server' + serverNum
-        os.mkdir(spath)
-        socket.bind("tcp://*:{}".format(resp))
-        print("Socket created!!!\n")
-        print('Server created and added successfully\n')
-    elif resp[0].decode() == 'exists':
-        print('Reloading server ... \n')
-        spath = spath + 'Server' + serverNum
-        socket.bind("tcp://*:{}".format(resp[1].decode()))
-        print("Socket created!!!\n")
-        print('Server is Up!!\n')
+    while True:
+        serverIp = str(input('Please insert server ip address: '))
+        serverPort = str(input('Please insert server port: '))
+        req.send_multipart(['new'.encode(), serverIp.encode(), serverPort.encode()])
+        resp = req.recv_multipart()
+        if resp[0].decode() == 'ok':
+            #you have to create the folder and socket
+            capacity = math.ceil(float(input('Server can be created, please insert capacity in GB: ')) * 1073741824)
+            req.send_multipart(['create'.encode(), serverIp.encode(), serverPort.encode(), str(capacity).encode()])
+            resp = req.recv_string()
+            socket.bind("tcp://*:{}".format(resp))
+            print("Socket created!!!\n")
+            print('Server created and added successfully\n')
+            break
+        elif resp[0].decode() == 'exists':
+            print('Server already exists, please try again ... \n')
 
 def upload(filename, bytes):
-    with open(spath + '/{}'.format(filename), 'wb') as f:
+    with open(spath + '{}'.format(filename), 'wb') as f:
         f.write(bytes)
     print('filepart saved successfully')
     socket.send_string('uploading ...')
 
 def download(filepart):
-    with open(spath + '/{}'.format(filepart), 'rb') as f:
+    with open(spath + '{}'.format(filepart), 'rb') as f:
         part = f.read()
     print('filepart successfully sent')
     socket.send_multipart(['downloading ...'.encode(), part])

@@ -13,8 +13,6 @@ print("Socket created!!!")
 
 partsize = 1024 * 1024 * 10
 
-serverDir = 5555
-
 database = 'database.json'
 
 # Function that allows the user to properly login
@@ -48,39 +46,34 @@ def register(username, pw):
         socket.send_string('Error!!!')
         print('Username already exists')
 
-def newServer(serverNum):
-    global serverDir
-    serverName = 'server' + serverNum
+def newServer(serverIp, serverPort):
+    serverId = serverIp + ':' + serverPort
     with open(database, 'r') as db:
         db_object = json.load(db)
-    if not serverName in db_object['servers'].keys():
+    if not serverId in db_object['servers'].keys():
         socket.send_multipart(['ok'.encode()])
         print('Server does not exist, so it can be added')
     else:
-        sdir = db_object['servers'][serverName]['socket']
-        socket.send_multipart(['exists'.encode(), sdir.encode()])
-        print('Server info already exists, connecting it...\n')
-        print('Server connected successfully')
-        serverDir = int(db_object['servers'][serverName]['socket']) + 1
+        socket.send_multipart(['exists'.encode()])
+        print('Server info already exists, Error ...\n')
 
-def createServer(serverNum, capacity):
+def createServer(serverIp, serverPort, capacity):
 
-    global serverDir
+    serverId = serverIp + ':' + serverPort
     serverCapacity = math.ceil(capacity/float(partsize))
 
     with open(database, 'r') as db:
         db_object = json.load(db)
-    db_object['servers']['server'+serverNum] = {
-    'socket': str(serverDir),
+    db_object['servers'][serverId] = {
+    'socket': serverId,
     'capacity': serverCapacity,
     'filled': 0,
     'files': []
     }
     with open(database, 'w') as db:
         json.dump(db_object, db, indent=4)
-    socket.send_string(str(serverDir))
-    serverDir += 1
-    print('Server created and added successfully!!!\n')
+    socket.send_string(serverPort)
+    print(f'Server {serverId} created and added successfully!!!\n')
 
 
 
@@ -173,10 +166,10 @@ def ProxyUp():
             exists(request[1].decode(), request[2].decode())
         elif cmd == 'new':
             # code to execute when a server wants to be created
-            newServer(request[1].decode())
+            newServer(request[1].decode(), request[2].decode())
         elif cmd == 'create':
             # code to execute when server is created
-            createServer(request[1].decode(), float(request[2].decode()))
+            createServer(request[1].decode(), request[2].decode(), float(request[3].decode()))
         elif cmd == 'list':
             # code to execute when request is list
             listfiles(request[1].decode())

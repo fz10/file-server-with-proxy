@@ -120,11 +120,11 @@ def upload():
                 print('File uploaded successfully\n')
                 break
             # Send part to a specific socket
-            socket.connect("tcp://localhost:{}".format(serversockets[i]))
+            socket.connect("tcp://{}".format(serversockets[i]))
             socket.send_multipart(['upload'.encode(), partnames[i].encode(), bytes])
             resp = socket.recv_string()
             print(resp)
-            socket.disconnect("tcp://localhost:{}".format(serversockets[i]))
+            socket.disconnect("tcp://{}".format(serversockets[i]))
             i += 1
     socket.connect(proxy)
 
@@ -172,12 +172,12 @@ def download():
     with open(dpath + newname, 'ab') as f:
         i = 0
         while i < len(partnames):
-            socket.connect("tcp://localhost:{}".format(serverparts[i]))
+            socket.connect("tcp://{}".format(serverparts[i]))
             socket.send_multipart(['download'.encode(), partnames[i].encode()])
             resp = socket.recv_multipart()
             print(resp[0].decode())
             f.write(resp[1])
-            socket.disconnect("tcp://localhost:{}".format(serverparts[i]))
+            socket.disconnect("tcp://{}".format(serverparts[i]))
             i += 1
         print('File downloaded successfully as {}'.format(newname))
     socket.connect(proxy)
