@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
     "users": {
         "Carlos": {
@@ -15,3 +16,22 @@
     },
     "servers": {}
 }
+=======
+{
+    "users": {
+        "Carlos": {
+            "password": "12345Carlos",
+            "files": {}
+        },
+        "Alex": {
+            "password": "12345Alex",
+            "files": {}
+        },
+        "Aiz": {
+            "password": "1234",
+            "files": {}
+        }
+    },
+    "servers": {}
+}
+>>>>>>> c2f1922a6b8f2a0276a0cc18cbd7e2559ae08edc
